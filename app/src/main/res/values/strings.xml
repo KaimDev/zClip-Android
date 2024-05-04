@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">ZClip-Android</string>
+
+    <!-- home fragment -->
+    <string name="network_not_detected">network not detected</string>
+    <string name="your_lan_ip">your lan ip</string>
+    <string name="disconnected">disconnected</string>
+    <string name="connected">connected</string>
+    <string name="synchronize">synchronize</string>
+    <string name="manual">manual</string>
+    <string name="mode">mode</string>
+</resources>
