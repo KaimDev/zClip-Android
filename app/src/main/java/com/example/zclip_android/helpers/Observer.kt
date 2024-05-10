@@ -1,6 +1,6 @@
 package com.example.zclip_android.helpers
 
-abstract class Observer
+interface Observer
 {
     abstract fun notify(message: String)
 }
