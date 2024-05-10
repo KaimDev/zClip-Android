@@ -1,5 +1,6 @@
 package com.example.zclip_android
 
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -13,6 +14,21 @@ class MainActivity : AppCompatActivity()
 {
     val viewModel: MainViewModel by lazy { MainViewModel(application) }
     private lateinit var binding: ActivityMainBinding
+
+    init
+    {
+        instance = this
+    }
+
+    companion object
+    {
+        private var instance: MainActivity? = null
+
+        fun applicationContext() : Context
+        {
+            return instance!!.applicationContext
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
