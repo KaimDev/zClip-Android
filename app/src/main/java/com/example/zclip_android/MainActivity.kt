@@ -11,7 +11,8 @@ import com.google.android.material.tabs.TabLayoutMediator
 
 class MainActivity : AppCompatActivity()
 {
-    lateinit var binding: ActivityMainBinding
+    val viewModel: MainActivityViewModel by lazy { MainActivityViewModel(application) }
+    private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
