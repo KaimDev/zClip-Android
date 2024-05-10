@@ -5,6 +5,7 @@ import android.content.ClipboardManager
 import android.content.Context
 import com.example.zclip_android.MainActivity
 import com.example.zclip_android.helpers.ClipboardModes
+import com.example.zclip_android.helpers.ServiceExtensions.Companion.sendNotification
 import com.example.zclip_android.interfaces.IClipboardService
 
 class ClipboardService : IClipboardService

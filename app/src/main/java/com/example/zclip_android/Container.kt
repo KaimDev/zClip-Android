@@ -7,10 +7,11 @@ class Container
 {
     fun resolveSyncService() : SyncService
     {
-        return SyncService()
+        val clipboard = resolveClipboardService()
+        return SyncService(clipboard)
     }
 
-    fun resolveClipboardService() : ClipboardService
+    private fun resolveClipboardService() : ClipboardService
     {
         return ClipboardService()
     }
