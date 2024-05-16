@@ -2,10 +2,15 @@ package com.example.zclip_android
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
+import com.example.zclip_android.services.SyncService
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
-class MainViewModel(application: Application) : AndroidViewModel(application)
+@HiltViewModel
+class MainViewModel @Inject constructor(
+    application: Application,
+    private val syncService: SyncService
+) : AndroidViewModel(application)
 {
-    private val container = Container()
 
-    private val syncService = container.resolveSyncService()
 }

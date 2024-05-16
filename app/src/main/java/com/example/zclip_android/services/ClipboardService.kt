@@ -2,24 +2,14 @@ package com.example.zclip_android.services
 
 import android.content.ClipData
 import android.content.ClipboardManager
-import android.content.Context
-import com.example.zclip_android.MainActivity
 import com.example.zclip_android.helpers.ClipboardModes
-import com.example.zclip_android.helpers.ServiceExtensions.Companion.sendNotification
 import com.example.zclip_android.interfaces.IClipboardService
+import javax.inject.Inject
 
-class ClipboardService : IClipboardService
+class ClipboardService @Inject constructor(private val clipboardManager: ClipboardManager) :
+    IClipboardService
 {
     private var clipboardModes: ClipboardModes = ClipboardModes.MANUAL
-
-    private lateinit var clipboardManager : ClipboardManager;
-
-    init
-    {
-        val context = MainActivity.applicationContext()
-
-        clipboardManager  = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-    }
 
     override fun start()
     {
@@ -36,7 +26,7 @@ class ClipboardService : IClipboardService
         TODO("Not yet implemented")
     }
 
-    private fun getClipboard() : String?
+    private fun getClipboard(): String?
     {
         val clipData = clipboardManager.primaryClip
 

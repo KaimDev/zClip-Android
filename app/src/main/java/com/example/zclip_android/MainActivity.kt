@@ -1,34 +1,21 @@
 package com.example.zclip_android
 
-import android.content.Context
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.zclip_android.databinding.ActivityMainBinding
 import com.google.android.material.tabs.TabLayoutMediator
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity()
 {
-    val viewModel: MainViewModel by lazy { MainViewModel(application) }
+    val viewModel: MainViewModel by viewModels()
     private lateinit var binding: ActivityMainBinding
-
-    init
-    {
-        instance = this
-    }
-
-    companion object
-    {
-        private var instance: MainActivity? = null
-
-        fun applicationContext() : Context
-        {
-            return instance!!.applicationContext
-        }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
