@@ -9,4 +9,5 @@
     <string name="synchronize">synchronize</string>
     <string name="manual">manual</string>
     <string name="mode">mode</string>
+    <string name="hint_target_ip">target ip</string>
 </resources>
