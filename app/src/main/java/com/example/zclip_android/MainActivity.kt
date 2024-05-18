@@ -10,6 +10,9 @@ import androidx.core.view.WindowInsetsCompat
 import com.example.zclip_android.databinding.ActivityMainBinding
 import com.google.android.material.tabs.TabLayoutMediator
 import dagger.hilt.android.AndroidEntryPoint
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.core.app.ActivityCompat
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity()
@@ -20,6 +23,8 @@ class MainActivity : AppCompatActivity()
     override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
+
+        checkAndRequestPermissions()
 
         binding = ActivityMainBinding.inflate(layoutInflater)
 
@@ -53,5 +58,26 @@ class MainActivity : AppCompatActivity()
                 else -> ContextCompat.getDrawable(this, R.drawable.ic_home)
             }
         }.attach()
+    }
+
+    private fun checkAndRequestPermissions()
+    {
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_WIFI_STATE
+            ) != PackageManager.PERMISSION_GRANTED
+        )
+        {
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_WIFI_STATE), 1)
+        }
+
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_NETWORK_STATE
+            ) != PackageManager.PERMISSION_GRANTED
+        )
+        {
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_NETWORK_STATE), 2)
+        }
     }
 }

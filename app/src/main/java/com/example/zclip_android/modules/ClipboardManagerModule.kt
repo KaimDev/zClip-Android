@@ -1,4 +1,4 @@
-package com.example.zclip_android.di
+package com.example.zclip_android.modules
 
 import android.content.ClipboardManager
 import android.content.Context
