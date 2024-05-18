@@ -9,6 +9,7 @@ import com.example.zclip_android.databinding.FragmentHomeBinding
 import com.example.zclip_android.models.LocalIpModel
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
+import com.example.zclip_android.R
 
 @AndroidEntryPoint
 class HomeFragment : Fragment()
@@ -25,8 +26,18 @@ class HomeFragment : Fragment()
     {
         binding = FragmentHomeBinding.inflate(inflater, container, false)
 
-        binding.tvLanIp.text = localIpModel.ip
+        setUpNetworkState()
 
         return binding.root
+    }
+
+    private fun setUpNetworkState()
+    {
+        binding.tvLanIp.text = localIpModel.ip
+
+        if (!localIpModel.hasError)
+        {
+            binding.ivAppState.setImageResource(R.drawable.ic_sync_disabled)
+        }
     }
 }
