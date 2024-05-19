@@ -11,7 +11,6 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import javax.inject.Singleton
 import com.example.zclip_android.R
 
 @Module
@@ -19,7 +18,6 @@ import com.example.zclip_android.R
 class NetworkModule
 {
     @SuppressLint("DefaultLocale")
-    @Singleton
     @Provides
     fun provideLocalIpAddress(@ApplicationContext context: Context): LocalIpModel
     {
