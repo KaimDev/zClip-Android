@@ -3,14 +3,14 @@ package com.example.zclip_android.services
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
-import com.example.zclip_android.helpers.Observer
+import com.example.zclip_android.interfaces.IObserver
 import com.example.zclip_android.helpers.ServiceExtensions.Companion.subscribe
 import javax.inject.Inject
 
 class SyncService @Inject constructor(
     private val clipboardService: ClipboardService
 ) : Service(),
-    Observer
+    IObserver
 {
     init
     {
