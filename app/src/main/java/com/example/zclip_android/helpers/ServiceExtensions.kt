@@ -16,7 +16,7 @@ class ServiceExtensions
 
         fun IService.sendNotification(message: String)
         {
-            IObservers.forEach { it.notify(message) }
+            IObservers.forEach { it.notify(this, message) }
         }
     }
 }

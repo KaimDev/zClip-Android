@@ -2,5 +2,5 @@ package com.example.zclip_android.interfaces
 
 interface IObserver
 {
-    fun notify(message: String)
+    fun <TService : IService> notify(sender: TService, message: String)
 }
