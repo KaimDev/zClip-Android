@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">ZClip-Android</string>
+    <string name="app_name">zClip</string>
 
     <!-- home fragment -->
     <string name="network_not_detected">network not detected</string>

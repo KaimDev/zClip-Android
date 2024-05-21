@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.zclip_android"
+    namespace = "com.kaimdev.zclip_android"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.zclip_android"
+        applicationId = "com.kaimdev.zclip_android"
         minSdk = 24
         targetSdk = 34
         versionCode = 1
