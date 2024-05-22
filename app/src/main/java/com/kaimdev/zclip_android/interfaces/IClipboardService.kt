@@ -6,5 +6,5 @@ interface IClipboardService : IService
 {
     fun start()
     fun stop()
-    fun changeMode(mode: ClipboardModes)
+    fun getManualClipboard()
 }
