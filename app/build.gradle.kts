@@ -16,7 +16,7 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = "com.kaimdev.zclip_android.Runner"
     }
 
     buildTypes {
@@ -52,6 +52,16 @@ dependencies {
 
     //Data store
     implementation(libs.androidx.datastore.preferences)
+
+    // For Robolectric tests.
+    testImplementation(libs.hilt.android.testing)
+    // ...with Kotlin.
+    kaptTest(libs.hilt.android.compiler.v244)
+
+    // For instrumented tests.
+    androidTestImplementation(libs.hilt.android.testing.v228alpha)
+    // ...with Kotlin.
+    kaptAndroidTest(libs.hilt.android.compiler.v228alpha)
 
     implementation(libs.hilt.android)
     kapt(libs.hilt.android.compiler)
