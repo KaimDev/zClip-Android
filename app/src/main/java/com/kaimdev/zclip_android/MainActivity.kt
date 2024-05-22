@@ -5,20 +5,28 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import com.kaimdev.zclip_android.databinding.ActivityMainBinding
 import com.google.android.material.tabs.TabLayoutMediator
 import dagger.hilt.android.AndroidEntryPoint
 import android.Manifest
 import android.content.pm.PackageManager
 import androidx.core.app.ActivityCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import com.kaimdev.zclip_android.stores.DataStore
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity()
 {
     val viewModel: MainViewModel by viewModels()
     private lateinit var binding: ActivityMainBinding
+
+    @Inject
+    lateinit var dataStore: DataStore
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
@@ -37,8 +45,17 @@ class MainActivity : AppCompatActivity()
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+        
+        configureSettingsOnetime()
 
         initTabLayout()
+    }
+
+    private fun configureSettingsOnetime()
+    {
+        CoroutineScope(Dispatchers.IO).launch {
+            dataStore.initialConfiguration()
+        }
     }
 
     private fun initTabLayout()
@@ -52,9 +69,9 @@ class MainActivity : AppCompatActivity()
         TabLayoutMediator(tabLayout, viewPage2) { tab, position ->
             tab.icon = when (position)
             {
-                0 -> ContextCompat.getDrawable(this, R.drawable.ic_home)
-                1 -> ContextCompat.getDrawable(this, R.drawable.ic_security)
-                2 -> ContextCompat.getDrawable(this, R.drawable.ic_settings)
+                0    -> ContextCompat.getDrawable(this, R.drawable.ic_home)
+                1    -> ContextCompat.getDrawable(this, R.drawable.ic_security)
+                2    -> ContextCompat.getDrawable(this, R.drawable.ic_settings)
                 else -> ContextCompat.getDrawable(this, R.drawable.ic_home)
             }
         }.attach()
@@ -68,7 +85,11 @@ class MainActivity : AppCompatActivity()
             ) != PackageManager.PERMISSION_GRANTED
         )
         {
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_WIFI_STATE), 1)
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.ACCESS_WIFI_STATE),
+                1
+            )
         }
 
         if (ActivityCompat.checkSelfPermission(
@@ -77,7 +98,11 @@ class MainActivity : AppCompatActivity()
             ) != PackageManager.PERMISSION_GRANTED
         )
         {
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_NETWORK_STATE), 2)
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.ACCESS_NETWORK_STATE),
+                2
+            )
         }
     }
 }

@@ -5,23 +5,21 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
-import androidx.datastore.preferences.core.intPreferencesKey
 import com.kaimdev.zclip_android.helpers.ClipboardModes
-import com.kaimdev.zclip_android.helpers.DataStoreKeys
-import com.kaimdev.zclip_android.helpers.dataStore
 import com.kaimdev.zclip_android.interfaces.IClipboardService
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import com.kaimdev.zclip_android.helpers.ServiceExtensions.Companion.sendNotification
+import com.kaimdev.zclip_android.stores.DataStore
 
 class ClipboardService @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val clipboardManager: ClipboardManager
+    private val clipboardManager: ClipboardManager,
+    private val dataStore: DataStore
 ) :
     IClipboardService
 {
@@ -63,9 +61,7 @@ class ClipboardService @Inject constructor(
 
     private suspend fun getClipboardMode()
     {
-        context.dataStore.data.map { preferences ->
-            (preferences[intPreferencesKey(DataStoreKeys.ITEM_CLIPBOARD_MODE)]) as ClipboardModes?
-        }.also {
+        dataStore.getClipboardMode().also {
             var firstTime = true
 
             it.filter { firstTime }.collect { mode ->
