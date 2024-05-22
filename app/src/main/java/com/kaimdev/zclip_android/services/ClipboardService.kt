@@ -2,12 +2,10 @@ package com.kaimdev.zclip_android.services
 
 import android.content.ClipData
 import android.content.ClipboardManager
-import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import com.kaimdev.zclip_android.helpers.ClipboardModes
 import com.kaimdev.zclip_android.interfaces.IClipboardService
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filter
@@ -17,7 +15,6 @@ import com.kaimdev.zclip_android.helpers.ServiceExtensions.Companion.sendNotific
 import com.kaimdev.zclip_android.stores.DataStore
 
 class ClipboardService @Inject constructor(
-    @ApplicationContext private val context: Context,
     private val clipboardManager: ClipboardManager,
     private val dataStore: DataStore
 ) :
@@ -59,18 +56,10 @@ class ClipboardService @Inject constructor(
         getClipboard()
     }
 
-    private suspend fun getClipboardMode()
+    override fun setClipboard(content: String)
     {
-        dataStore.getClipboardMode().also {
-            var firstTime = true
-
-            it.filter { firstTime }.collect { mode ->
-                clipboardModes = mode as ClipboardModes
-                stop()
-                start()
-                firstTime = !firstTime
-            }
-        }
+        val clip: ClipData = ClipData.newPlainText("content", content)
+        clipboardManager.setPrimaryClip(clip)
     }
 
     private fun getClipboard()
@@ -89,9 +78,17 @@ class ClipboardService @Inject constructor(
         }
     }
 
-    private fun setClipboard(content: String)
+    private suspend fun getClipboardMode()
     {
-        val clip: ClipData = ClipData.newPlainText("content", content)
-        clipboardManager.setPrimaryClip(clip)
+        dataStore.getClipboardMode().also {
+            var firstTime = true
+
+            it.filter { firstTime }.collect { mode ->
+                clipboardModes = mode as ClipboardModes
+                stop()
+                start()
+                firstTime = !firstTime
+            }
+        }
     }
 }
