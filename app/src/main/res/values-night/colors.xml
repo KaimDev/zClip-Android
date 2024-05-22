@@ -6,4 +6,9 @@
     <!--  -->
     <color name="colorPrimary">#E2EBF2</color>
     <color name="colorSecondary">#2D363D</color>
+
+    <color name="colorPrimaryLight">#2D363D</color>
+    <color name="colorSecondaryLight">#E2EBF2</color>
+    <color name="colorPrimaryDark">#E2EBF2</color>
+    <color name="colorSecondaryDark">#2D363D</color>
 </resources>

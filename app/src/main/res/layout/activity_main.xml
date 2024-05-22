@@ -5,7 +5,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorSecondary"
+    android:background="?attr/backgroundApp"
     android:orientation="vertical"
     tools:context=".MainActivity">
 
@@ -17,7 +17,7 @@
     <com.google.android.material.tabs.TabLayout
         android:layout_gravity="bottom"
         android:id="@+id/tab_layout"
-        android:background="@color/colorSecondary"
+        android:background="?attr/colorSecondary"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
