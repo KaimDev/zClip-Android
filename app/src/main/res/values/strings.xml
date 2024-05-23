@@ -10,4 +10,5 @@
     <string name="manual">manual</string>
     <string name="mode">mode</string>
     <string name="hint_target_ip">target ip</string>
+    <string name="send">send</string>
 </resources>
