@@ -21,6 +21,6 @@ class ExampleInstrumentedTest
     {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertEquals("com.example.zclip_android", appContext.packageName)
+        assertEquals("com.kaimdev.zclip_android", appContext.packageName)
     }
 }

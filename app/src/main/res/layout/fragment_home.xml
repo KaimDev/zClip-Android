@@ -61,8 +61,8 @@
         app:boxCornerRadiusBottomStart="50dp"
         app:boxCornerRadiusTopEnd="50dp"
         app:boxCornerRadiusTopStart="50dp"
-        app:boxStrokeWidth="3dp"
         app:boxStrokeColor="@color/input_color_state"
+        app:boxStrokeWidth="3dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tv_app_state">
@@ -71,8 +71,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:fontFamily="@font/jetbrains_mono_regular"
-            android:hint="@string/hint_target_ip"
             android:gravity="center"
+            android:hint="@string/hint_target_ip"
             android:textAlignment="center" />
 
     </com.google.android.material.textfield.TextInputLayout>
@@ -91,6 +91,7 @@
 
     <!-- mode -->
     <TextView
+        android:id="@+id/tv_mode"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="50dp"
@@ -98,30 +99,30 @@
         android:text="@string/manual"
         android:textAlignment="center"
         android:textSize="20sp"
-        android:id="@+id/tv_mode"
         app:layout_constraintTop_toBottomOf="@id/btn_synchronize" />
 
     <TextView
-        android:text="@string/mode"
-        app:layout_constraintTop_toBottomOf="@id/tv_mode"
-        android:textAlignment="center"
-        android:fontFamily="@font/jetbrains_mono_regular"
-        android:textSize="16sp"
-        android:layout_marginTop="10dp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:fontFamily="@font/jetbrains_mono_regular"
+        android:text="@string/mode"
+        android:textAlignment="center"
+        android:textSize="16sp"
+        app:layout_constraintTop_toBottomOf="@id/tv_mode" />
 
     <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
         android:layout_width="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:id="@+id/efab_send"
+        android:layout_height="wrap_content"
         android:layout_marginEnd="20dp"
         android:layout_marginBottom="70dp"
-        app:icon="@drawable/ic_send"
-        android:text="@string/send"
         android:backgroundTint="?attr/colorPrimary"
+        android:text="@string/send"
+        android:textColor="?attr/colorSecondary"
+        app:icon="@drawable/ic_send"
         app:iconGravity="end"
         app:iconTint="?attr/colorSecondary"
-        android:textColor="?attr/colorSecondary"
-        android:layout_height="wrap_content"/>
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

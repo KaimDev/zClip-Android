@@ -2,7 +2,7 @@ package com.kaimdev.zclip_android.stores
 
 import android.content.Context
 import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
 import com.kaimdev.zclip_android.helpers.ClipboardModes
 import com.kaimdev.zclip_android.helpers.DataStoreKeys
 import com.kaimdev.zclip_android.helpers.Languages
@@ -13,41 +13,57 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.last
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import javax.inject.Singleton
 
-
-@Singleton
 class DataStore @Inject constructor(
     @ApplicationContext context: Context,
     private val systemSettingsProvider: SystemSettingsProvider
 )
 {
     private val dataStore = context.dataStore
+    private var filterOne = true
+    private var filterTwo = true
+    private var filterThree = true
 
     suspend fun initialConfiguration()
     {
-        val clipboardMode = getClipboardMode()
-        val theme = getTheme()
-        val language = getLanguage()
+        val clipboardModeFlow = getClipboardMode()
+        val themeFlow = getTheme()
+        val languageFlow = getLanguage()
 
         CoroutineScope(Dispatchers.IO).launch {
-            if (clipboardMode.last() == null)
+
+            clipboardModeFlow.filter { filterOne }.collect()
             {
-                setClipboardMode(ClipboardModes.MANUAL)
+                if (it == null)
+                {
+                    setClipboardMode(ClipboardModes.MANUAL)
+                }
+
+                filterOne = false
             }
 
-            if (theme.last() == null)
+            themeFlow.filter { filterTwo }.collect()
             {
-                setTheme(systemSettingsProvider.getSystemTheme())
+                if (it == null)
+                {
+                    setTheme(systemSettingsProvider.getSystemTheme())
+                }
+
+                filterTwo = false
             }
 
-            if (language.last() == null)
+            languageFlow.filter { filterThree }.collect()
             {
-                setLanguage(systemSettingsProvider.getSystemLanguage())
+                if (it == null)
+                {
+                    setLanguage(systemSettingsProvider.getSystemLanguage())
+                }
+
+                filterThree = false
             }
         }
     }
@@ -55,21 +71,27 @@ class DataStore @Inject constructor(
     fun getClipboardMode(): Flow<ClipboardModes?>
     {
         return dataStore.data.map { preferences ->
-            preferences[intPreferencesKey(DataStoreKeys.ITEM_CLIPBOARD_MODE)] as ClipboardModes?
+            preferences[stringPreferencesKey(DataStoreKeys.ITEM_CLIPBOARD_MODE)]?.let { clipboardMode ->
+                ClipboardModes.valueOf(clipboardMode)
+            }
         }
     }
 
     fun getTheme(): Flow<DeviceThemes?>
     {
         return dataStore.data.map { preferences ->
-            preferences[intPreferencesKey(DataStoreKeys.ITEM_THEME)] as DeviceThemes?
+            preferences[stringPreferencesKey(DataStoreKeys.ITEM_THEME)]?.let { theme ->
+                DeviceThemes.valueOf(theme)
+            }
         }
     }
 
     fun getLanguage(): Flow<Languages?>
     {
         return dataStore.data.map { preferences ->
-            preferences[intPreferencesKey(DataStoreKeys.ITEM_LANGUAGE)] as Languages?
+            preferences[stringPreferencesKey(DataStoreKeys.ITEM_LANGUAGE)]?.let { language ->
+                Languages.valueOf(language)
+            }
         }
     }
 
@@ -77,8 +99,8 @@ class DataStore @Inject constructor(
     {
         CoroutineScope(Dispatchers.IO).launch {
             dataStore.edit { preferences ->
-                preferences[intPreferencesKey(DataStoreKeys.ITEM_CLIPBOARD_MODE)] =
-                    clipboardMode.ordinal
+                preferences[stringPreferencesKey(DataStoreKeys.ITEM_CLIPBOARD_MODE)] =
+                    clipboardMode.name
             }
         }
     }
@@ -87,7 +109,7 @@ class DataStore @Inject constructor(
     {
         CoroutineScope(Dispatchers.IO).launch {
             dataStore.edit { preferences ->
-                preferences[intPreferencesKey(DataStoreKeys.ITEM_THEME)] = theme.ordinal
+                preferences[stringPreferencesKey(DataStoreKeys.ITEM_THEME)] = theme.name
             }
         }
     }
@@ -96,7 +118,7 @@ class DataStore @Inject constructor(
     {
         CoroutineScope(Dispatchers.IO).launch {
             dataStore.edit { preferences ->
-                preferences[intPreferencesKey(DataStoreKeys.ITEM_LANGUAGE)] = language.ordinal
+                preferences[stringPreferencesKey(DataStoreKeys.ITEM_LANGUAGE)] = language.name
             }
         }
     }

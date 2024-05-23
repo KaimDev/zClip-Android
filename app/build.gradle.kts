@@ -52,6 +52,7 @@ dependencies {
 
     //Data store
     implementation(libs.androidx.datastore.preferences)
+    implementation(libs.androidx.datastore.preferences.core)
 
     // For Robolectric tests.
     testImplementation(libs.hilt.android.testing)

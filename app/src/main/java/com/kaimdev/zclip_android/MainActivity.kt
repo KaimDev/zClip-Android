@@ -38,6 +38,10 @@ class MainActivity : AppCompatActivity()
 
         enableEdgeToEdge()
 
+        CoroutineScope(Dispatchers.IO).launch {
+            dataStore.initialConfiguration()
+        }
+
         setContentView(binding.root)
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
@@ -45,17 +49,8 @@ class MainActivity : AppCompatActivity()
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-        
-        configureSettingsOnetime()
 
         initTabLayout()
-    }
-
-    private fun configureSettingsOnetime()
-    {
-        CoroutineScope(Dispatchers.IO).launch {
-            dataStore.initialConfiguration()
-        }
     }
 
     private fun initTabLayout()
