@@ -2,44 +2,50 @@ package com.kaimdev.zclip_android.services
 
 import android.content.ClipData
 import android.content.ClipboardManager
+import android.content.Context
 import android.os.Handler
 import android.os.Looper
+import android.widget.Toast
 import com.kaimdev.zclip_android.helpers.ClipboardModes
 import com.kaimdev.zclip_android.interfaces.IClipboardService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import com.kaimdev.zclip_android.helpers.ServiceExtensions.Companion.sendNotification
 import com.kaimdev.zclip_android.stores.DataStore
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.withContext
 
 class ClipboardService @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val clipboardManager: ClipboardManager,
     private val dataStore: DataStore
 ) :
     IClipboardService
 {
-    private lateinit var clipboardModes: ClipboardModes
-    private lateinit var taskHandler: Handler
+    private var clipboardModes: ClipboardModes? = null
+    private var taskHandler: Handler? = null
     private lateinit var runnable: Runnable
-    private lateinit var lastContent: String
+    private var lastContent: String? = null
 
     override fun start()
     {
-        CoroutineScope(Dispatchers.IO).launch {
-            getClipboardMode()
+        CoroutineScope(Dispatchers.Main).launch {
+            Toast.makeText(context, "Clipboard service started", Toast.LENGTH_SHORT).show()
         }
 
-        if (ClipboardModes.AUTOMATIC == clipboardModes)
-        {
-            taskHandler = Handler(Looper.getMainLooper())
-            runnable = Runnable {
-                getClipboard()
-                taskHandler.postDelayed(runnable, 10000)
-            }
+        CoroutineScope(Dispatchers.IO).launch {
 
-            taskHandler.post(runnable)
+            getClipboardMode()
+
+            withContext(Dispatchers.Default)
+            {
+                if (ClipboardModes.AUTOMATIC == clipboardModes)
+                {
+                    runAuto()
+                }
+            }
         }
     }
 
@@ -47,7 +53,7 @@ class ClipboardService @Inject constructor(
     {
         if (clipboardModes == ClipboardModes.AUTOMATIC)
         {
-            taskHandler.removeCallbacks(runnable)
+            taskHandler?.removeCallbacks(runnable)
         }
     }
 
@@ -62,6 +68,27 @@ class ClipboardService @Inject constructor(
         clipboardManager.setPrimaryClip(clip)
     }
 
+    private fun restart()
+    {
+        stop()
+
+        if (ClipboardModes.AUTOMATIC == clipboardModes)
+        {
+            runAuto()
+        }
+    }
+
+    private fun runAuto()
+    {
+        taskHandler = Handler(Looper.getMainLooper())
+        runnable = Runnable {
+            getClipboard()
+            taskHandler!!.postDelayed(runnable, 10000)
+        }
+
+        taskHandler!!.post(runnable)
+    }
+
     private fun getClipboard()
     {
         val clipData = clipboardManager.primaryClip
@@ -74,21 +101,16 @@ class ClipboardService @Inject constructor(
                 return
             }
             lastContent = content
-            sendNotification(lastContent)
+            sendNotification(lastContent!!)
         }
     }
 
     private suspend fun getClipboardMode()
     {
-        dataStore.getClipboardMode().also {
-            var firstTime = true
-
-            it.filter { firstTime }.collect { mode ->
-                clipboardModes = mode as ClipboardModes
-                stop()
-                start()
-                firstTime = !firstTime
-            }
+        dataStore.getClipboardMode().collect()
+        {
+            clipboardModes = it
+            restart()
         }
     }
 }

@@ -7,6 +7,7 @@
     <string name="disconnected">disconnected</string>
     <string name="connected">connected</string>
     <string name="synchronize">synchronize</string>
+    <string name="stop_sync">stop sync</string>
     <string name="manual">manual</string>
     <string name="auto">auto</string>
     <string name="not_mode_selected">not mode selected</string>

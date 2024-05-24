@@ -40,7 +40,7 @@ class DataStore @Inject constructor(
             {
                 if (it == null)
                 {
-                    setClipboardMode(ClipboardModes.MANUAL)
+                    setClipboardMode(ClipboardModes.AUTOMATIC)
                 }
 
                 filterOne = false
