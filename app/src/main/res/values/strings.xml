@@ -8,6 +8,8 @@
     <string name="connected">connected</string>
     <string name="synchronize">synchronize</string>
     <string name="manual">manual</string>
+    <string name="auto">auto</string>
+    <string name="not_mode_selected">not mode selected</string>
     <string name="mode">mode</string>
     <string name="hint_target_ip">target ip</string>
     <string name="send">send</string>

@@ -96,7 +96,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="50dp"
         android:fontFamily="@font/jetbrains_mono_bold"
-        android:text="@string/manual"
+        android:text="@string/not_mode_selected"
         android:textAlignment="center"
         android:textSize="20sp"
         app:layout_constraintTop_toBottomOf="@id/btn_synchronize" />

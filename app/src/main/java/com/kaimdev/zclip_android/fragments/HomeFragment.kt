@@ -23,6 +23,7 @@ class HomeFragment : Fragment()
 {
     private lateinit var binding: FragmentHomeBinding
     private var isSynced = false
+    private var clipboardMode: ClipboardModes? = null
 
     @Inject
     lateinit var localIpModel: LocalIpModel
@@ -59,32 +60,38 @@ class HomeFragment : Fragment()
         if (!localIpModel.hasError)
         {
             binding.ivAppState.setImageResource(R.drawable.ic_sync_disabled)
+        }
 
-            if (!isSynced)
-            {
-                binding.efabSend.visibility = View.GONE
-            }
+        if (clipboardMode == ClipboardModes.AUTOMATIC)
+        {
+            binding.tvMode.text = getString(R.string.auto)
+            binding.efabSend.visibility = View.GONE
+        } else
+        {
+            binding.tvMode.text = getString(R.string.manual)
+            binding.efabSend.visibility = View.VISIBLE
+        }
+
+        if (!isSynced)
+        {
+            binding.efabSend.visibility = View.GONE
         }
     }
 
     private fun getClipboardMode()
     {
-        val clipboardMode = dataStore.getClipboardMode()
-        var mode: ClipboardModes? = null
+        val clipboardModeFlow = dataStore.getClipboardMode()
 
         CoroutineScope(Dispatchers.IO).launch {
 
-            clipboardMode.collect() {
-                mode = it
+            clipboardModeFlow.collect() {
+                clipboardMode = it
 
                 withContext(Dispatchers.Main) {
-                    if (mode != null)
-                        Log.d("ClipboardMode", mode!!.name)
+                    if (clipboardMode != null)
+                        Log.d("ClipboardMode", clipboardMode!!.name)
 
-                    if (mode == ClipboardModes.AUTOMATIC)
-                    {
-                        setUpNetworkState()
-                    }
+                    setUpNetworkState()
                 }
             }
         }
