@@ -2,7 +2,6 @@ package com.kaimdev.zclip_android
 
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.kaimdev.zclip_android.databinding.ActivityMainBinding
@@ -22,7 +21,6 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity()
 {
-    val viewModel: MainViewModel by viewModels()
     private lateinit var binding: ActivityMainBinding
 
     @Inject
