@@ -5,4 +5,5 @@ interface ISyncService
     fun isSync() : Boolean
     fun start()
     fun stop()
+    fun sendClipboardContent()
 }

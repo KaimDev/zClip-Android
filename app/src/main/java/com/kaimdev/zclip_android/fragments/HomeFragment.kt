@@ -45,6 +45,8 @@ class HomeFragment : Fragment()
         setUpListeners()
         setUpNetworkState()
 
+        binding.efabSend.setOnClickListener { viewModel.sendClipboard() }
+
         return binding.root
     }
 

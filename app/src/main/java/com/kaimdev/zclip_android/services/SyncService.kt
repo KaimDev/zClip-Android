@@ -62,6 +62,11 @@ class SyncService : Service(), ISyncService, IObserver
         isSync = false
     }
 
+    override fun sendClipboardContent()
+    {
+        clipboardService.getManualClipboard()
+    }
+
     override fun <TService : IService> notify(sender: TService, message: String)
     {
         when (sender)

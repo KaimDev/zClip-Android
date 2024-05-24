@@ -64,4 +64,9 @@ class HomeViewModel @Inject constructor(
     {
         return isSyncFlow
     }
+
+    fun sendClipboard()
+    {
+        syncService?.sendClipboardContent()
+    }
 }
