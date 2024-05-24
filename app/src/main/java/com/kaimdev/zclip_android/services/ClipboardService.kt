@@ -4,7 +4,6 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.os.Handler
-import android.os.Looper
 import android.widget.Toast
 import com.kaimdev.zclip_android.helpers.ClipboardModes
 import com.kaimdev.zclip_android.interfaces.IClipboardService
@@ -80,13 +79,7 @@ class ClipboardService @Inject constructor(
 
     private fun runAuto()
     {
-        taskHandler = Handler(Looper.getMainLooper())
-        runnable = Runnable {
-            getClipboard()
-            taskHandler!!.postDelayed(runnable, 10000)
-        }
-
-        taskHandler!!.post(runnable)
+        clipboardManager.addPrimaryClipChangedListener { getClipboard() }
     }
 
     private fun getClipboard()
