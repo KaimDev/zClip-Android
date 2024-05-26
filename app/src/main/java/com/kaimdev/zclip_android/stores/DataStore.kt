@@ -40,7 +40,16 @@ class DataStore @Inject constructor(
             {
                 if (it == null)
                 {
-                    setClipboardMode(ClipboardModes.MANUAL)
+                    val androidVersion = systemSettingsProvider.getAndroidVersion()
+
+                    if (androidVersion >= 29)
+                    {
+                        setClipboardMode(ClipboardModes.MANUAL)
+                    }
+                    else
+                    {
+                        setClipboardMode(ClipboardModes.AUTOMATIC)
+                    }
                 }
 
                 filterOne = false
