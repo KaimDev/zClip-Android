@@ -14,4 +14,7 @@
     <string name="mode">mode</string>
     <string name="hint_target_ip">target ip</string>
     <string name="send">send</string>
+
+    <!-- Notification Content -->
+    <string name="click_to_send_the_clipboard_content">Click to send the clipboard content</string>
 </resources>

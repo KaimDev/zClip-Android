@@ -29,4 +29,9 @@ class SystemSettingsProvider @Inject constructor(@ApplicationContext private val
             else -> Languages.ENGLISH
         }
     }
+
+    fun getAndroidVersion(): Int
+    {
+        return android.os.Build.VERSION.SDK_INT
+    }
 }

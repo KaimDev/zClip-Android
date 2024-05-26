@@ -22,7 +22,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 @AndroidEntryPoint
-class HomeFragment : Fragment()
+class HomeFragment (private val fromNotification: Boolean) : Fragment()
 {
     private val viewModel: HomeViewModel by viewModels()
     private lateinit var binding: FragmentHomeBinding
@@ -47,6 +47,11 @@ class HomeFragment : Fragment()
 
         binding.efabSend.setOnClickListener { viewModel.sendClipboard() }
 
+        if (fromNotification)
+        {
+            viewModel.startSyncService()
+        }
+
         return binding.root
     }
 
@@ -60,6 +65,23 @@ class HomeFragment : Fragment()
         }
 
         observeSyncState()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle)
+    {
+        super.onSaveInstanceState(outState)
+
+        outState.putBoolean("isSynced", isSynced)
+    }
+
+    override fun onViewStateRestored(savedInstanceState: Bundle?)
+    {
+        super.onViewStateRestored(savedInstanceState)
+
+        if (savedInstanceState != null)
+        {
+            isSynced = savedInstanceState.getBoolean("isSynced")
+        }
     }
 
     private fun setUpListeners()
@@ -152,6 +174,12 @@ class HomeFragment : Fragment()
                     if (isSynced)
                     {
                         changeUItoSynced()
+
+                        if (fromNotification)
+                        {
+                            viewModel.sendClipboard()
+                        }
+
                     } else
                     {
                         changeUItoNotSynced()

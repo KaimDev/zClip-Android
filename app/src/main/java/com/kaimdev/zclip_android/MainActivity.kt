@@ -17,6 +17,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import android.os.Build
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity()
@@ -26,9 +27,19 @@ class MainActivity : AppCompatActivity()
     @Inject
     lateinit var dataStore: DataStore
 
+    private var fromNotification = false
+
     override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
+
+        val intent = intent
+
+        if (intent != null && intent.getBooleanExtra("notification", false))
+        {
+            intent.removeExtra("notification")
+            fromNotification = true
+        }
 
         checkAndRequestPermissions()
 
@@ -56,7 +67,7 @@ class MainActivity : AppCompatActivity()
         val viewPage2 = binding.viewPager
         val tabLayout = binding.tabLayout
 
-        val adapter = ViewPagerAdapter(supportFragmentManager, lifecycle)
+        val adapter = ViewPagerAdapter(supportFragmentManager, lifecycle, fromNotification)
         viewPage2.adapter = adapter
 
         TabLayoutMediator(tabLayout, viewPage2) { tab, position ->
@@ -96,6 +107,24 @@ class MainActivity : AppCompatActivity()
                 arrayOf(Manifest.permission.ACCESS_NETWORK_STATE),
                 2
             )
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+        {
+            if (ActivityCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
+            )
+            {
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                    3
+                )
+            }
+
+            return
         }
     }
 }

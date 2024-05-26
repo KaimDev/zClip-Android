@@ -11,9 +11,6 @@ import com.kaimdev.zclip_android.interfaces.IClipboardService
 import com.kaimdev.zclip_android.interfaces.IService
 import com.kaimdev.zclip_android.interfaces.ISyncService
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -22,9 +19,16 @@ class SyncService : Service(), ISyncService, IObserver
     @Inject
     lateinit var clipboardService: ClipboardService
 
+    @Inject
+    lateinit var notificationService: NotificationService
+
     private val binder = LocalBinder()
 
     private var isSync = false
+
+    companion object {
+        const val ACTION_SEND_CLIPBOARD_CONTENT = "com.kaimdev.zclip_android.ACTION_SEND_CLIPBOARD_CONTENT"
+    }
 
     inner class LocalBinder : Binder()
     {
@@ -38,8 +42,8 @@ class SyncService : Service(), ISyncService, IObserver
     {
         super.onCreate()
 
-
         clipboardService.subscribe(this)
+        notificationService.subscribe(this)
     }
 
     override fun isSync(): Boolean
@@ -49,16 +53,16 @@ class SyncService : Service(), ISyncService, IObserver
 
     override fun start()
     {
-        CoroutineScope(Dispatchers.Main).launch {
-            Toast.makeText(this@SyncService, "Sync service started", Toast.LENGTH_SHORT).show()
-        }
         clipboardService.start()
+        notificationService.start()
+
         isSync = true
     }
 
     override fun stop()
     {
         clipboardService.stop()
+        notificationService.stop()
         isSync = false
     }
 
@@ -81,5 +85,19 @@ class SyncService : Service(), ISyncService, IObserver
     override fun onBind(intent: Intent?): IBinder
     {
         return binder
+    }
+
+    override fun onUnbind(intent: Intent?): Boolean
+    {
+        clipboardService.stop()
+        notificationService.stop()
+        return super.onUnbind(intent)
+    }
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        when (intent?.action) {
+            ACTION_SEND_CLIPBOARD_CONTENT -> sendClipboardContent()
+        }
+        return super.onStartCommand(intent, flags, startId)
     }
 }

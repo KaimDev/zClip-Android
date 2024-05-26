@@ -2,9 +2,7 @@ package com.kaimdev.zclip_android.services
 
 import android.content.ClipData
 import android.content.ClipboardManager
-import android.content.Context
 import android.os.Handler
-import android.widget.Toast
 import com.kaimdev.zclip_android.helpers.ClipboardModes
 import com.kaimdev.zclip_android.interfaces.IClipboardService
 import kotlinx.coroutines.CoroutineScope
@@ -13,11 +11,9 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import com.kaimdev.zclip_android.helpers.ServiceExtensions.Companion.sendNotification
 import com.kaimdev.zclip_android.stores.DataStore
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.withContext
 
 class ClipboardService @Inject constructor(
-    @ApplicationContext private val context: Context,
     private val clipboardManager: ClipboardManager,
     private val dataStore: DataStore
 ) :
@@ -30,10 +26,6 @@ class ClipboardService @Inject constructor(
 
     override fun start()
     {
-        CoroutineScope(Dispatchers.Main).launch {
-            Toast.makeText(context, "Clipboard service started", Toast.LENGTH_SHORT).show()
-        }
-
         CoroutineScope(Dispatchers.IO).launch {
 
             getClipboardMode()
