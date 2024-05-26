@@ -84,6 +84,12 @@ class HomeFragment (private val fromNotification: Boolean) : Fragment()
         }
     }
 
+    override fun onDestroyView()
+    {
+        super.onDestroyView()
+        viewModel.stopSyncService()
+    }
+
     private fun setUpListeners()
     {
         if (localIpModel.hasError)
