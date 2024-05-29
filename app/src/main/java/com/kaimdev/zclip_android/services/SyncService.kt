@@ -8,6 +8,7 @@ import android.widget.Toast
 import com.kaimdev.zclip_android.interfaces.IObserver
 import com.kaimdev.zclip_android.helpers.ServiceExtensions.Companion.subscribe
 import com.kaimdev.zclip_android.interfaces.IClipboardService
+import com.kaimdev.zclip_android.interfaces.IListenerService
 import com.kaimdev.zclip_android.interfaces.IService
 import com.kaimdev.zclip_android.interfaces.ISyncService
 import dagger.hilt.android.AndroidEntryPoint
@@ -22,12 +23,17 @@ class SyncService : Service(), ISyncService, IObserver
     @Inject
     lateinit var notificationService: NotificationService
 
+    @Inject
+    lateinit var listenerService: ListenerService
+
     private val binder = LocalBinder()
 
     private var isSync = false
 
-    companion object {
-        const val ACTION_SEND_CLIPBOARD_CONTENT = "com.kaimdev.zclip_android.ACTION_SEND_CLIPBOARD_CONTENT"
+    companion object
+    {
+        const val ACTION_SEND_CLIPBOARD_CONTENT =
+            "com.kaimdev.zclip_android.ACTION_SEND_CLIPBOARD_CONTENT"
     }
 
     inner class LocalBinder : Binder()
@@ -44,6 +50,7 @@ class SyncService : Service(), ISyncService, IObserver
 
         clipboardService.subscribe(this)
         notificationService.subscribe(this)
+        listenerService.subscribe(this)
     }
 
     override fun isSync(): Boolean
@@ -55,6 +62,7 @@ class SyncService : Service(), ISyncService, IObserver
     {
         clipboardService.start()
         notificationService.start()
+        listenerService.start()
 
         isSync = true
     }
@@ -63,6 +71,8 @@ class SyncService : Service(), ISyncService, IObserver
     {
         clipboardService.stop()
         notificationService.stop()
+        listenerService.stop()
+
         isSync = false
     }
 
@@ -79,6 +89,11 @@ class SyncService : Service(), ISyncService, IObserver
             {
                 Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
             }
+
+            is IListenerService ->
+            {
+                Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -91,11 +106,15 @@ class SyncService : Service(), ISyncService, IObserver
     {
         clipboardService.stop()
         notificationService.stop()
+        listenerService.stop()
+
         return super.onUnbind(intent)
     }
 
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        when (intent?.action) {
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int
+    {
+        when (intent?.action)
+        {
             ACTION_SEND_CLIPBOARD_CONTENT -> sendClipboardContent()
         }
         return super.onStartCommand(intent, flags, startId)

@@ -58,6 +58,8 @@ dependencies {
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.datastore.preferences.core)
 
+    implementation(libs.nanohttpd)
+
     // For Robolectric tests.
     testImplementation(libs.hilt.android.testing)
     // ...with Kotlin.

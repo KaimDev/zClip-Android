@@ -12,6 +12,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import com.kaimdev.zclip_android.R
+import com.kaimdev.zclip_android.models.ListenerSettingsModel
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -55,5 +56,11 @@ class NetworkModule
 
         val message = context.getString(R.string.network_not_detected)
         return LocalIpModel(message, true)
+    }
+
+    @Provides
+    fun provideListenerSettingsModel(): ListenerSettingsModel
+    {
+        return ListenerSettingsModel(1705)
     }
 }
