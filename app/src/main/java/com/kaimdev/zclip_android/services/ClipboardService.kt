@@ -3,6 +3,7 @@ package com.kaimdev.zclip_android.services
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.os.Handler
+import com.kaimdev.zclip_android.event_args.ClipboardEventArgs
 import com.kaimdev.zclip_android.helpers.ClipboardModes
 import com.kaimdev.zclip_android.interfaces.IClipboardService
 import kotlinx.coroutines.CoroutineScope
@@ -86,7 +87,7 @@ class ClipboardService @Inject constructor(
                 return
             }
             lastContent = content
-            sendNotification(lastContent!!)
+            sendNotification(ClipboardEventArgs(lastContent!!))
         }
     }
 

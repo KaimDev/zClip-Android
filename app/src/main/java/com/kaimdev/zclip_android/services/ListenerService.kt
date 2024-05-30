@@ -1,5 +1,7 @@
 package com.kaimdev.zclip_android.services
 
+import com.kaimdev.zclip_android.event_args.ListenerEventArgs
+import com.kaimdev.zclip_android.event_args.ListenerEventType
 import com.kaimdev.zclip_android.helpers.ServiceExtensions.Companion.sendNotification
 import com.kaimdev.zclip_android.interfaces.IListenerService
 import com.kaimdev.zclip_android.models.ListenerSettingsModel
@@ -22,29 +24,41 @@ class ListenerService @Inject constructor(listenerSettingsModel: ListenerSetting
     override fun serve(session: IHTTPSession?): Response
     {
         val uri = session?.uri
+        val method = session?.method
 
         when (uri)
         {
-            "/"  ->
+            "/"           ->
             {
-                val method = session.method
-
                 if (method == Method.POST)
                 {
                     return receiveClipboardContent(session)
                 } else if (method == Method.GET)
                 {
-                    return testConnection(session)
+                    return requestConnection(session)
                 }
             }
 
-            else ->
+            "/disconnect" ->
+            {
+                if (method == Method.GET)
+                {
+                    return requestDisconnect(session)
+                }
+            }
+
+            else          ->
             {
                 return newFixedLengthResponse(Response.Status.NOT_FOUND, "text/plain", "Not found")
             }
         }
 
         return super.serve(session)
+    }
+
+    private fun requestConnection(session: IHTTPSession?): Response
+    {
+        return newFixedLengthResponse(Response.Status.OK, "text/plain", "Connection successful")
     }
 
     private fun receiveClipboardContent(session: IHTTPSession?): Response
@@ -59,7 +73,9 @@ class ListenerService @Inject constructor(listenerSettingsModel: ListenerSetting
                 "No content received"
             )
 
-        sendNotification(postData)
+        CoroutineScope(Dispatchers.Main).launch {
+            sendNotification(ListenerEventArgs(postData, ListenerEventType.ClipboardContent))
+        }
 
         return newFixedLengthResponse(
             Response.Status.ACCEPTED,
@@ -68,8 +84,8 @@ class ListenerService @Inject constructor(listenerSettingsModel: ListenerSetting
         )
     }
 
-    private fun testConnection(session: IHTTPSession?): Response
+    private fun requestDisconnect(session: IHTTPSession): Response
     {
-        return newFixedLengthResponse(Response.Status.OK, "text/plain", "Connection successful")
+        return newFixedLengthResponse(Response.Status.OK, "text/plain", "Disconnected")
     }
 }

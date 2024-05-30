@@ -1,5 +1,6 @@
 package com.kaimdev.zclip_android.helpers
 
+import com.kaimdev.zclip_android.interfaces.IEventArgs
 import com.kaimdev.zclip_android.interfaces.IObserver
 import com.kaimdev.zclip_android.interfaces.IService
 
@@ -14,9 +15,9 @@ class ServiceExtensions
             IObservers.add(observer)
         }
 
-        fun IService.sendNotification(message: String)
+        fun IService.sendNotification(eventArgs: IEventArgs)
         {
-            IObservers.forEach { it.notify(this, message) }
+            IObservers.forEach { it.notify(this, eventArgs) }
         }
     }
 }
