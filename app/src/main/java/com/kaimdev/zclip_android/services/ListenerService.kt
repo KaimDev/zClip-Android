@@ -23,31 +23,47 @@ class ListenerService @Inject constructor(listenerSettingsModel: ListenerSetting
 
     override fun serve(session: IHTTPSession?): Response
     {
-        val uri = session?.uri
-        val method = session?.method
+        val ip = session?.parameters?.get("ip")?.first()
+            ?: return newFixedLengthResponse(
+                Response.Status.BAD_REQUEST,
+                "text/plain",
+                "No ip received"
+            )
+
+        val uri = session.uri
+        val method = session.method
+
+        if (uri == "/reply_request" && method == Method.GET)
+            return replyRequest(session, ip)
+
+        val code = session.parameters?.get("code")?.first()
+            ?: return newFixedLengthResponse(
+                Response.Status.BAD_REQUEST,
+                "text/plain",
+                "No code received"
+            )
 
         when (uri)
         {
-            "/"           ->
+            "/"                   ->
             {
                 if (method == Method.POST)
-                {
                     return receiveClipboardContent(session)
-                } else if (method == Method.GET)
-                {
-                    return requestConnection(session)
-                }
             }
 
-            "/disconnect" ->
+            "/request_connection" ->
+            {
+                if (method == Method.POST)
+                    return requestConnection(ip, code)
+            }
+
+            "/disconnect"         ->
             {
                 if (method == Method.GET)
-                {
-                    return requestDisconnect(session)
-                }
+                    return requestDisconnect(ip, code)
             }
 
-            else          ->
+            else                  ->
             {
                 return newFixedLengthResponse(Response.Status.NOT_FOUND, "text/plain", "Not found")
             }
@@ -56,15 +72,42 @@ class ListenerService @Inject constructor(listenerSettingsModel: ListenerSetting
         return super.serve(session)
     }
 
-    private fun requestConnection(session: IHTTPSession?): Response
+    private fun requestConnection(ip: String, code: String): Response
     {
-        return newFixedLengthResponse(Response.Status.OK, "text/plain", "Connection successful")
+        sendNotification(ListenerEventArgs(ListenerEventType.RequestConnection, ip, code))
+
+        return newFixedLengthResponse(Response.Status.OK, "text/plain", "Request received")
     }
 
-    private fun receiveClipboardContent(session: IHTTPSession?): Response
+    private fun replyRequest(session: IHTTPSession, ip: String): Response
+    {
+        val message = session.parameters?.get("allow")?.first()
+            ?: return newFixedLengthResponse(
+                Response.Status.BAD_REQUEST,
+                "text/plain",
+                "No allow param received"
+            )
+
+        var canBeSync = false
+
+        val callBack = { result: Any -> canBeSync = result as Boolean }
+
+        sendNotification(
+            ListenerEventArgs(
+                ListenerEventType.ReplyRequest, ip, message = message, callBack = callBack
+            )
+        )
+
+        if (!canBeSync)
+            return newFixedLengthResponse(Response.Status.FORBIDDEN, "text/plain", "Request denied")
+
+        return newFixedLengthResponse(Response.Status.OK, "text/plain", "Reply received")
+    }
+
+    private fun receiveClipboardContent(session: IHTTPSession): Response
     {
         val files = HashMap<String, String>()
-        session?.parseBody(files)
+        session.parseBody(files)
 
         val postData = files["postData"]
             ?: return newFixedLengthResponse(
@@ -74,7 +117,7 @@ class ListenerService @Inject constructor(listenerSettingsModel: ListenerSetting
             )
 
         CoroutineScope(Dispatchers.Main).launch {
-            sendNotification(ListenerEventArgs(postData, ListenerEventType.ClipboardContent))
+            sendNotification(ListenerEventArgs(ListenerEventType.ClipboardContent, postData))
         }
 
         return newFixedLengthResponse(
@@ -84,8 +127,9 @@ class ListenerService @Inject constructor(listenerSettingsModel: ListenerSetting
         )
     }
 
-    private fun requestDisconnect(session: IHTTPSession): Response
+    private fun requestDisconnect(ip: String, code: String): Response
     {
+        sendNotification(ListenerEventArgs(ListenerEventType.Disconnect, ip, code))
         return newFixedLengthResponse(Response.Status.OK, "text/plain", "Disconnected")
     }
 }
