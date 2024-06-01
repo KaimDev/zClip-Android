@@ -38,15 +38,22 @@ class NotificationService @Inject constructor(
     {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O)
         {
-            val channel = NotificationChannel (
+            val sendClipboardContentChannel = NotificationChannel (
                 NotificationChannels.SEND_CLIPBOARD_CONTENT,
                 NotificationChannels.SEND_CLIPBOARD_CONTENT,
                 NotificationManager.IMPORTANCE_LOW
             )
 
+            val requestConnectionChannel = NotificationChannel (
+                NotificationChannels.REQUEST_CONNECTION,
+                NotificationChannels.REQUEST_CONNECTION,
+                NotificationManager.IMPORTANCE_HIGH
+            )
+
             with(NotificationManagerCompat.from(context))
             {
-                createNotificationChannel(channel)
+                createNotificationChannel(sendClipboardContentChannel)
+                createNotificationChannel(requestConnectionChannel)
             }
         }
     }
@@ -88,6 +95,25 @@ class NotificationService @Inject constructor(
         with(NotificationManagerCompat.from(context))
         {
             cancel(1)
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    override fun showRequestConnectionNotification()
+    {
+        val notification =
+            notificationBuilder.buildByChannelId(NotificationChannels.REQUEST_CONNECTION)
+
+        with(NotificationManagerCompat.from(context)) {
+            notify(2, notification!!)
+        }
+    }
+
+    override fun hideRequestConnectionNotification()
+    {
+        with(NotificationManagerCompat.from(context))
+        {
+            cancel(2)
         }
     }
 }

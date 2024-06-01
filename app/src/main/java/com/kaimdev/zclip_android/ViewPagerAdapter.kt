@@ -7,8 +7,13 @@ import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.kaimdev.zclip_android.fragments.HomeFragment
 import com.kaimdev.zclip_android.fragments.SecurityFragment
 import com.kaimdev.zclip_android.fragments.SettingsFragment
+import com.kaimdev.zclip_android.models.FragmentEventModel
 
-class ViewPagerAdapter(fragmentManager: FragmentManager, lifecycle: Lifecycle, private val fromNotification: Boolean) : FragmentStateAdapter(fragmentManager, lifecycle)
+class ViewPagerAdapter(
+    fragmentManager: FragmentManager,
+    lifecycle: Lifecycle,
+    private val fragmentEventModel: FragmentEventModel
+) : FragmentStateAdapter(fragmentManager, lifecycle)
 {
     override fun getItemCount(): Int = 3
 
@@ -16,10 +21,10 @@ class ViewPagerAdapter(fragmentManager: FragmentManager, lifecycle: Lifecycle, p
     {
         return when (position)
         {
-            0 -> HomeFragment(fromNotification)
+            0 -> HomeFragment(fragmentEventModel)
             1 -> SecurityFragment()
             2 -> SettingsFragment()
-            else -> HomeFragment(fromNotification)
+            else -> HomeFragment(fragmentEventModel)
         }
     }
 

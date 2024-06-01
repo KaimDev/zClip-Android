@@ -4,6 +4,7 @@ import android.app.Service
 import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
+import android.widget.Toast
 import com.kaimdev.zclip_android.event_args.ListenerEventArgs
 import com.kaimdev.zclip_android.event_args.ListenerEventType
 import com.kaimdev.zclip_android.interfaces.IObserver
@@ -21,7 +22,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import com.kaimdev.zclip_android.event_args.SyncServiceEventArgs
+import com.kaimdev.zclip_android.helpers.ServiceExtensions.Companion.sendNotification
 
 @AndroidEntryPoint
 class SyncService : Service(), ISyncService, IObserver
@@ -53,6 +57,12 @@ class SyncService : Service(), ISyncService, IObserver
     {
         const val ACTION_SEND_CLIPBOARD_CONTENT =
             "com.kaimdev.zclip_android.ACTION_SEND_CLIPBOARD_CONTENT"
+
+        const val ACTION_ACCEPT_REQUEST_CONNECTION =
+            "com.kaimdev.zclip_android.ACTION_ACCEPT_REQUEST_CONNECTION"
+
+        const val ACTION_DENY_REQUEST_CONNECTION =
+            "com.kaimdev.zclip_android.ACTION_DENY_REQUEST_CONNECTION"
     }
 
     inner class LocalBinder : Binder()
@@ -72,25 +82,13 @@ class SyncService : Service(), ISyncService, IObserver
         listenerService.subscribe(this)
     }
 
-    override fun onBind(intent: Intent?): IBinder
-    {
-        return binder
-    }
-
-    override fun onUnbind(intent: Intent?): Boolean
-    {
-        clipboardService.stop()
-        notificationService.stop()
-        listenerService.stop()
-
-        return super.onUnbind(intent)
-    }
-
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int
     {
         when (intent?.action)
         {
-            ACTION_SEND_CLIPBOARD_CONTENT -> sendClipboardContent()
+            ACTION_SEND_CLIPBOARD_CONTENT    -> sendClipboardContent()
+            ACTION_ACCEPT_REQUEST_CONNECTION -> allowConnection()
+            ACTION_DENY_REQUEST_CONNECTION   -> denyConnection()
         }
         return super.onStartCommand(intent, flags, startId)
     }
@@ -98,7 +96,7 @@ class SyncService : Service(), ISyncService, IObserver
     override fun start()
     {
         listenerService.start()
-        observeSyncState()
+        notificationService.stop()
     }
 
     override fun stop()
@@ -110,9 +108,42 @@ class SyncService : Service(), ISyncService, IObserver
         isSyncFlow.value = false
     }
 
+    override fun onBind(intent: Intent?): IBinder
+    {
+        return binder
+    }
+
+    override fun onUnbind(intent: Intent?): Boolean
+    {
+        clipboardService.stop()
+        listenerService.stop()
+
+        return super.onUnbind(intent)
+    }
+
     override fun sendClipboardContent()
     {
         clipboardService.getManualClipboard()
+    }
+
+    override fun allowConnection()
+    {
+        CoroutineScope(Dispatchers.Main).launch {
+            Toast.makeText(this@SyncService, "Connection allowed", Toast.LENGTH_SHORT).show()
+        }
+
+        notificationService.hideRequestConnectionNotification()
+        sendNotification(SyncServiceEventArgs(false))
+    }
+
+    override fun denyConnection()
+    {
+        CoroutineScope(Dispatchers.Main).launch {
+            Toast.makeText(this@SyncService, "Connection denied", Toast.LENGTH_SHORT).show()
+        }
+
+        notificationService.hideRequestConnectionNotification()
+        sendNotification(SyncServiceEventArgs(false))
     }
 
     override fun <TService : IService> notify(sender: TService, eventArgs: IEventArgs)
@@ -141,8 +172,7 @@ class SyncService : Service(), ISyncService, IObserver
                 {
                     clipboardService.start()
                     notificationService.start()
-                }
-                else
+                } else
                 {
                     stop()
                 }
@@ -164,14 +194,20 @@ class SyncService : Service(), ISyncService, IObserver
                     dataStore.getTargetIp().filter { filter }.collect {
                         savedIp = it
                         filter = false
-                    }
 
-                    if (savedIp == ipFromRequest)
-                    {
-                        isSyncFlow.value = true
-                    } else
-                    {
-                        notificationService.showRequestConnectionNotification()
+                        withContext(Dispatchers.Main)
+                        {
+                            if (savedIp == ipFromRequest)
+                            {
+                                isSyncFlow.value = true
+                                observeSyncState()
+                            } else
+                            {
+                                notificationService.showRequestConnectionNotification()
+
+                                sendNotification(SyncServiceEventArgs(true))
+                            }
+                        }
                     }
                 }
             }

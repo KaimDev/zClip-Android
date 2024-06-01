@@ -4,4 +4,6 @@ interface INotificationService : IService
 {
     fun start()
     fun stop()
+    fun showRequestConnectionNotification()
+    fun hideRequestConnectionNotification()
 }

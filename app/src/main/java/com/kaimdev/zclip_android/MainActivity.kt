@@ -18,6 +18,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import android.os.Build
+import com.kaimdev.zclip_android.models.FragmentEventModel
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity()
@@ -27,7 +28,7 @@ class MainActivity : AppCompatActivity()
     @Inject
     lateinit var dataStore: DataStore
 
-    private var fromNotification = false
+    private var fragmentEventModel = FragmentEventModel()
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
@@ -35,10 +36,10 @@ class MainActivity : AppCompatActivity()
 
         val intent = intent
 
-        if (intent != null && intent.getBooleanExtra("notification", false))
+        if (intent != null && intent.getBooleanExtra("sendClipboardContent", false))
         {
-            intent.removeExtra("notification")
-            fromNotification = true
+            intent.removeExtra("sendClipboardContent")
+            fragmentEventModel = FragmentEventModel(sendClipboardContent = true)
         }
 
         checkAndRequestPermissions()
@@ -67,7 +68,7 @@ class MainActivity : AppCompatActivity()
         val viewPage2 = binding.viewPager
         val tabLayout = binding.tabLayout
 
-        val adapter = ViewPagerAdapter(supportFragmentManager, lifecycle, fromNotification)
+        val adapter = ViewPagerAdapter(supportFragmentManager, lifecycle, fragmentEventModel)
         viewPage2.adapter = adapter
 
         TabLayoutMediator(tabLayout, viewPage2) { tab, position ->

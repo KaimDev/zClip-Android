@@ -1,5 +1,6 @@
 package com.kaimdev.zclip_android.fragments
 
+import android.app.AlertDialog
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -14,6 +15,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import com.kaimdev.zclip_android.R
 import com.kaimdev.zclip_android.helpers.ClipboardModes
+import com.kaimdev.zclip_android.models.FragmentEventModel
 import com.kaimdev.zclip_android.modules.NetworkModule
 import com.kaimdev.zclip_android.stores.DataStore
 import kotlinx.coroutines.CoroutineScope
@@ -22,7 +24,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 @AndroidEntryPoint
-class HomeFragment (private val fromNotification: Boolean) : Fragment()
+class HomeFragment(private val fragmentEventModel: FragmentEventModel) : Fragment()
 {
     private val viewModel: HomeViewModel by viewModels()
     private lateinit var binding: FragmentHomeBinding
@@ -34,6 +36,8 @@ class HomeFragment (private val fromNotification: Boolean) : Fragment()
 
     @Inject
     lateinit var dataStore: DataStore
+
+    private var alertDialog: AlertDialog? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -47,7 +51,7 @@ class HomeFragment (private val fromNotification: Boolean) : Fragment()
 
         binding.efabSend.setOnClickListener { viewModel.sendClipboard() }
 
-        if (fromNotification)
+        if (fragmentEventModel.sendClipboardContent)
         {
             viewModel.startSyncService()
         }
@@ -65,6 +69,7 @@ class HomeFragment (private val fromNotification: Boolean) : Fragment()
         }
 
         observeSyncState()
+        observeShowDialog()
     }
 
     override fun onSaveInstanceState(outState: Bundle)
@@ -181,7 +186,7 @@ class HomeFragment (private val fromNotification: Boolean) : Fragment()
                     {
                         changeUItoSynced()
 
-                        if (fromNotification)
+                        if (fragmentEventModel.sendClipboardContent)
                         {
                             viewModel.sendClipboard()
                         }
@@ -232,5 +237,45 @@ class HomeFragment (private val fromNotification: Boolean) : Fragment()
         binding.tietTargetIp.isEnabled = true
         handleSendButton()
         setUpListeners()
+    }
+
+    private fun observeShowDialog()
+    {
+        CoroutineScope(Dispatchers.Main).launch {
+            viewModel.showDialogFlow.collect { showDialog ->
+
+                if (showDialog)
+                {
+                    showRequestConnectionDialog()
+                } else
+                {
+                    hideRequestConnectionDialog()
+                }
+
+            }
+        }
+    }
+
+    private fun showRequestConnectionDialog()
+    {
+        val builder = AlertDialog.Builder(requireContext())
+        builder.setTitle(getString(R.string.there_is_a_new_request))
+        builder.setMessage(getString(R.string.allow_new_connection))
+        builder.setPositiveButton(getString(R.string.accept)) { dialog, which ->
+            viewModel.acceptConnection()
+            viewModel.showDialogFlow.value = false
+        }
+        builder.setNegativeButton(getString(R.string.deny)) { dialog, which ->
+            viewModel.denyConnection()
+            viewModel.showDialogFlow.value = false
+        }
+
+        alertDialog = builder.create()
+        alertDialog!!.show()
+    }
+
+    private fun hideRequestConnectionDialog()
+    {
+        alertDialog?.dismiss()
     }
 }
