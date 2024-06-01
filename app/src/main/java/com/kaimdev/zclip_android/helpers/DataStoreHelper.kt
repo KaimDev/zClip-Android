@@ -11,6 +11,7 @@ object DataStoreKeys
     const val ITEM_THEME = "item_theme"
     const val ITEM_LANGUAGE = "item_language"
     const val ITEM_CLIPBOARD_MODE = "item_clipboard_mode"
+    const val ITEM_TARGET_IP = "item_target_ip"
 }
 
 val Context.dataStore: DataStore<Preferences>

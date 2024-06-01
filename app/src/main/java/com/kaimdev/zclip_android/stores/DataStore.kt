@@ -104,6 +104,13 @@ class DataStore @Inject constructor(
         }
     }
 
+    fun getTargetIp(): Flow<String?>
+    {
+        return dataStore.data.map { preferences ->
+            preferences[stringPreferencesKey(DataStoreKeys.ITEM_TARGET_IP)]
+        }
+    }
+
     fun setClipboardMode(clipboardMode: ClipboardModes)
     {
         CoroutineScope(Dispatchers.IO).launch {
@@ -128,6 +135,24 @@ class DataStore @Inject constructor(
         CoroutineScope(Dispatchers.IO).launch {
             dataStore.edit { preferences ->
                 preferences[stringPreferencesKey(DataStoreKeys.ITEM_LANGUAGE)] = language.name
+            }
+        }
+    }
+
+    fun setTargetIp(targetIp: String)
+    {
+        CoroutineScope(Dispatchers.IO).launch {
+            dataStore.edit { preferences ->
+                preferences[stringPreferencesKey(DataStoreKeys.ITEM_TARGET_IP)] = targetIp
+            }
+        }
+    }
+
+    fun deleteTargetIp()
+    {
+        CoroutineScope(Dispatchers.IO).launch {
+            dataStore.edit { preferences ->
+                preferences.remove(stringPreferencesKey(DataStoreKeys.ITEM_TARGET_IP))
             }
         }
     }
