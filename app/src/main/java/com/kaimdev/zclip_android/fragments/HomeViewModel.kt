@@ -10,8 +10,11 @@ import com.kaimdev.zclip_android.interfaces.ISyncService
 import com.kaimdev.zclip_android.services.SyncService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -31,7 +34,12 @@ class HomeViewModel @Inject constructor(
             val binder = service as SyncService.LocalBinder
             syncService = binder.getService()
             syncService!!.start()
-            isSyncFlow.value = syncService!!.isSync()
+
+            CoroutineScope(Dispatchers.IO).launch {
+                syncService!!.isSync().collect {
+                    isSyncFlow.value = it
+                }
+            }
         }
 
         override fun onServiceDisconnected(name: ComponentName?)
