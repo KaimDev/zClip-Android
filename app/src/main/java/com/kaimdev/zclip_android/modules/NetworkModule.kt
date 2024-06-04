@@ -13,11 +13,23 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import com.kaimdev.zclip_android.R
 import com.kaimdev.zclip_android.models.ListenerSettingsModel
+import com.kaimdev.zclip_android.server.IApplicationApi
+import com.kaimdev.zclip_android.stores.DataStore
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.runBlocking
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import javax.inject.Inject
 
 @Module
 @InstallIn(SingletonComponent::class)
 class NetworkModule
 {
+    @Inject
+    private lateinit var dataStore: DataStore
+
     @SuppressLint("DefaultLocale")
     @Provides
     fun provideLocalIpAddress(@ApplicationContext context: Context): LocalIpModel
@@ -62,5 +74,30 @@ class NetworkModule
     fun provideListenerSettingsModel(): ListenerSettingsModel
     {
         return ListenerSettingsModel(1705)
+    }
+
+    @Provides
+    fun provideRetrofit(): IApplicationApi
+    {
+        return runBlocking {
+            val targetIp = async(Dispatchers.IO) {
+                var filter = true
+                val targetIpFlow = dataStore.getTargetIp()
+                var targetIp: String? = null
+
+                targetIpFlow.filter { filter }.collect {
+                    filter = false
+                    targetIp = it
+                }
+
+                targetIp ?: throw Exception("Target IP not found")
+            }.await()
+
+            Retrofit.Builder()
+                .baseUrl("http://$targetIp/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build()
+                .create(IApplicationApi::class.java)
+        }
     }
 }

@@ -58,7 +58,12 @@ dependencies {
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.datastore.preferences.core)
 
+    //Server
     implementation(libs.nanohttpd)
+
+    //Client
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson.v2110)
 
     // For Robolectric tests.
     testImplementation(libs.hilt.android.testing)
