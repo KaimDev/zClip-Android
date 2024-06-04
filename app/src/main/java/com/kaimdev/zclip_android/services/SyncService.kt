@@ -40,6 +40,9 @@ class SyncService : Service(), ISyncService, IObserver
     lateinit var listenerService: ListenerService
 
     @Inject
+    lateinit var clientService: ClientService
+
+    @Inject
     lateinit var dataStore: DataStore
 
     private val binder = LocalBinder()
@@ -80,6 +83,7 @@ class SyncService : Service(), ISyncService, IObserver
         clipboardService.subscribe(this)
         notificationService.subscribe(this)
         listenerService.subscribe(this)
+        clientService.subscribe(this)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int
@@ -96,7 +100,8 @@ class SyncService : Service(), ISyncService, IObserver
     override fun start()
     {
         listenerService.start()
-        notificationService.stop()
+        notificationService.start()
+        clientService.requestConnection()
     }
 
     override fun stop()
@@ -116,6 +121,7 @@ class SyncService : Service(), ISyncService, IObserver
     override fun onUnbind(intent: Intent?): Boolean
     {
         clipboardService.stop()
+        notificationService.stop()
         listenerService.stop()
 
         return super.onUnbind(intent)
@@ -171,7 +177,6 @@ class SyncService : Service(), ISyncService, IObserver
                 if (it)
                 {
                     clipboardService.start()
-                    notificationService.start()
                 } else
                 {
                     stop()
@@ -222,14 +227,46 @@ class SyncService : Service(), ISyncService, IObserver
 
                 // TODO: Implement the SecurityService to validate and save the code
 
-                isSyncFlow.value = true
-                dataStore.setTargetIp(listenerEventArgs.ip!!)
+                if (listenerEventArgs.message.toBoolean())
+                {
+                    CoroutineScope(Dispatchers.IO).launch {
+                        var filter = true
+
+                        dataStore.getTargetIp().filter { filter }.collect {
+                            filter = false
+
+                            if (it == listenerEventArgs.ip)
+                            {
+                                withContext(Dispatchers.Main) {
+                                    isSyncFlow.value = true
+                                    observeSyncState()
+                                }
+                            }
+
+                        }
+                    }
+                }
             }
 
             ListenerEventType.Disconnect        ->
             {
-                isSyncFlow.value = false
-                dataStore.deleteTargetIp()
+                CoroutineScope(Dispatchers.IO).launch {
+                    var filter = true
+
+                    dataStore.getTargetIp().filter { filter }.collect {
+                        filter = false
+
+                        if (it == listenerEventArgs.ip)
+                        {
+                            withContext(Dispatchers.Main) {
+                                dataStore.deleteTargetIp()
+                                isSyncFlow.value = false
+                            }
+                        }
+
+                    }
+                }
+
             }
 
             ListenerEventType.ClipboardContent  ->
