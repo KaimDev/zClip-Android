@@ -28,6 +28,11 @@ class DataStore @Inject constructor(
     private var filterTwo = true
     private var filterThree = true
 
+    fun start()
+    {
+        return
+    }
+
     suspend fun initialConfiguration()
     {
         val clipboardModeFlow = getClipboardMode()

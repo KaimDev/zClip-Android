@@ -15,6 +15,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import com.kaimdev.zclip_android.R
 import com.kaimdev.zclip_android.helpers.ClipboardModes
+import com.kaimdev.zclip_android.helpers.SyncState
 import com.kaimdev.zclip_android.models.FragmentEventModel
 import com.kaimdev.zclip_android.modules.NetworkModule
 import com.kaimdev.zclip_android.stores.DataStore
@@ -29,7 +30,7 @@ class HomeFragment(private val fragmentEventModel: FragmentEventModel) : Fragmen
     private val viewModel: HomeViewModel by viewModels()
     private lateinit var binding: FragmentHomeBinding
     private var clipboardMode: ClipboardModes? = null
-    private var isSynced = false
+    private var isSynced: SyncState = SyncState.NOT_SYNCED
 
     @Inject
     lateinit var localIpModel: LocalIpModel
@@ -76,7 +77,10 @@ class HomeFragment(private val fragmentEventModel: FragmentEventModel) : Fragmen
     {
         super.onSaveInstanceState(outState)
 
-        outState.putBoolean("isSynced", isSynced)
+        if (isSynced == SyncState.SYNCED)
+            outState.putBoolean("isSynced", true)
+        else if (isSynced == SyncState.NOT_SYNCED)
+            outState.putBoolean("isSynced", false)
     }
 
     override fun onViewStateRestored(savedInstanceState: Bundle?)
@@ -85,7 +89,10 @@ class HomeFragment(private val fragmentEventModel: FragmentEventModel) : Fragmen
 
         if (savedInstanceState != null)
         {
-            isSynced = savedInstanceState.getBoolean("isSynced")
+            isSynced = if (savedInstanceState.getBoolean("isSynced"))
+                SyncState.SYNCED
+            else
+                SyncState.NOT_SYNCED
         }
     }
 
@@ -113,37 +120,48 @@ class HomeFragment(private val fragmentEventModel: FragmentEventModel) : Fragmen
             return
         }
 
-        if (!isSynced)
+        when (isSynced)
         {
-            binding.btnSynchronize.setOnClickListener {
+            SyncState.NOT_SYNCED ->
+            {
 
-                if (verifyNetwork())
-                {
-                    val ip = binding.tietTargetIp.text.toString()
+                binding.btnSynchronize.setOnClickListener {
 
-                    // Regex for 192.168.X.X
-                    val regex = Regex("^(192\\.168\\.[0-9]{1,3}\\.[0-9]{1,3})\$")
-
-                    if (!regex.matches(ip))
+                    if (verifyNetwork())
                     {
-                        binding.tilInput.isErrorEnabled = true
-                        binding.tilInput.error = getString(R.string.invalid_ip)
-                        binding.tilInput.requestFocus()
-                        return@setOnClickListener
-                    } else
-                    {
-                        binding.tilInput.isErrorEnabled = false
+                        val ip = binding.tietTargetIp.text.toString()
+
+                        // Regex for 192.168.X.X
+                        val regex = Regex("^(192\\.168\\.[0-9]{1,3}\\.[0-9]{1,3})\$")
+
+                        if (!regex.matches(ip))
+                        {
+                            binding.tilInput.isErrorEnabled = true
+                            binding.tilInput.error = getString(R.string.invalid_ip)
+                            binding.tilInput.requestFocus()
+                            return@setOnClickListener
+                        } else
+                        {
+                            binding.tilInput.isErrorEnabled = false
+                        }
+
+                        dataStore.setTargetIp(ip)
+
+                        viewModel.startSyncService()
                     }
 
-                    dataStore.setTargetIp(ip)
-
-                    viewModel.startSyncService()
                 }
-
             }
-        } else
-        {
-            binding.btnSynchronize.setOnClickListener { viewModel.stopSyncService() }
+
+            SyncState.SYNCED     ->
+            {
+                binding.btnSynchronize.setOnClickListener { viewModel.stopSyncService() }
+            }
+
+            SyncState.WAITING    ->
+            {
+                binding.btnSynchronize.setOnClickListener { viewModel.stopSyncService() }
+            }
         }
     }
 
@@ -187,7 +205,7 @@ class HomeFragment(private val fragmentEventModel: FragmentEventModel) : Fragmen
 
     private fun handleSendButton()
     {
-        if (clipboardMode == ClipboardModes.MANUAL && isSynced)
+        if (clipboardMode == ClipboardModes.MANUAL && isSynced == SyncState.SYNCED)
         {
             binding.efabSend.visibility = View.VISIBLE
             return
@@ -204,18 +222,28 @@ class HomeFragment(private val fragmentEventModel: FragmentEventModel) : Fragmen
 
                 withContext(Dispatchers.Main)
                 {
-                    if (isSynced)
+                    when (isSynced)
                     {
-                        changeUItoSynced()
-
-                        if (fragmentEventModel.sendClipboardContent)
+                        SyncState.SYNCED     ->
                         {
-                            viewModel.sendClipboard()
+
+                            changeUItoSynced()
+
+                            if (fragmentEventModel.sendClipboardContent)
+                            {
+                                viewModel.sendClipboard()
+                            }
                         }
 
-                    } else
-                    {
-                        changeUItoNotSynced()
+                        SyncState.NOT_SYNCED ->
+                        {
+                            changeUItoNotSynced()
+                        }
+
+                        SyncState.WAITING    ->
+                        {
+                            changeUItoWaiting()
+                        }
                     }
                 }
             }
@@ -257,6 +285,16 @@ class HomeFragment(private val fragmentEventModel: FragmentEventModel) : Fragmen
         binding.ivAppState.setImageResource(R.drawable.ic_sync_disabled)
         binding.tvAppState.text = getString(R.string.disconnected)
         binding.tietTargetIp.isEnabled = true
+        handleSendButton()
+        setUpListeners()
+    }
+
+    private fun changeUItoWaiting()
+    {
+        binding.btnSynchronize.text = getString(R.string.cancel_sync)
+        binding.ivAppState.setImageResource(R.drawable.ic_waiting_connection)
+        binding.tvAppState.text = getString(R.string.waiting_for_connection)
+        binding.tietTargetIp.isEnabled = false
         handleSendButton()
         setUpListeners()
     }

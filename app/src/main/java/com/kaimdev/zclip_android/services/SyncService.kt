@@ -9,6 +9,7 @@ import android.os.IBinder
 import android.os.Looper
 import android.os.Message
 import android.os.Process
+import android.util.Log
 import android.widget.Toast
 import com.kaimdev.zclip_android.event_args.ListenerEventArgs
 import com.kaimdev.zclip_android.event_args.ListenerEventType
@@ -30,6 +31,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import com.kaimdev.zclip_android.event_args.SyncServiceEventArgs
 import com.kaimdev.zclip_android.helpers.ServiceExtensions.Companion.sendNotification
+import com.kaimdev.zclip_android.helpers.SyncState
 import dagger.hilt.EntryPoint
 import dagger.hilt.EntryPoints
 import dagger.hilt.InstallIn
@@ -83,9 +85,13 @@ class SyncService : Service(), ISyncService, IObserver
                         CoroutineScope(Dispatchers.IO).launch {
 
                             listenerService.start()
-                            notificationService.start()
+//                            notificationService.start()
                             clientService.requestConnection()
+                            dataStore.start()
+
                         }
+
+                        isSyncFlow.value = SyncState.WAITING
 
                         CoroutineScope(Dispatchers.Main).launch {
                             Toast.makeText(
@@ -107,7 +113,7 @@ class SyncService : Service(), ISyncService, IObserver
                         notificationService.stop()
                         listenerService.stop()
 
-                        isSyncFlow.value = false
+                        isSyncFlow.value = SyncState.NOT_SYNCED
                     }
 
                     ACTION_SEND_CLIPBOARD_CONTENT    ->
@@ -159,11 +165,11 @@ class SyncService : Service(), ISyncService, IObserver
 
     private val binder = LocalBinder()
 
-    private val isSyncFlow: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    private val isSyncFlow: MutableStateFlow<SyncState> = MutableStateFlow(SyncState.NOT_SYNCED)
 
-    private var isSyncStaticState: Boolean = false
+    private var isSyncStaticState: SyncState = SyncState.NOT_SYNCED
 
-    override fun isSync(): Flow<Boolean>
+    override fun isSync(): Flow<SyncState>
     {
         return isSyncFlow
     }
@@ -225,6 +231,13 @@ class SyncService : Service(), ISyncService, IObserver
         return super.onStartCommand(intent, flags, startId)
     }
 
+    override fun onDestroy()
+    {
+        super.onDestroy()
+
+        Log.d("SyncService", "onDestroy")
+    }
+
     override fun start()
     {
         val msg = serviceHandler?.obtainMessage(ACTION_START_SYNC_SERVICE)
@@ -284,12 +297,11 @@ class SyncService : Service(), ISyncService, IObserver
 
                 isSyncStaticState = it
 
-                if (it)
+                when (it)
                 {
-                    clipboardService.start()
-                } else
-                {
-                    stop()
+                    SyncState.SYNCED     -> clipboardService.start()
+                    SyncState.NOT_SYNCED -> stop()
+                    else                 -> return@collect
                 }
             }
         }
@@ -304,7 +316,8 @@ class SyncService : Service(), ISyncService, IObserver
                 CoroutineScope(Dispatchers.IO).launch {
 
                     withContext(Dispatchers.Main) {
-                        Toast.makeText(this@SyncService, "Request connection", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@SyncService, "Request connection", Toast.LENGTH_SHORT)
+                            .show()
                     }
 
                     var filter = true
@@ -317,7 +330,7 @@ class SyncService : Service(), ISyncService, IObserver
                         {
                             if (it == ipFromRequest)
                             {
-                                isSyncFlow.value = true
+                                isSyncFlow.value = SyncState.SYNCED
                                 observeSyncState()
                             } else
                             {
@@ -336,7 +349,7 @@ class SyncService : Service(), ISyncService, IObserver
                     Toast.makeText(this@SyncService, "Reply request", Toast.LENGTH_SHORT).show()
                 }
 
-                if (isSyncStaticState)
+                if (isSyncStaticState == SyncState.SYNCED)
                 {
                     listenerEventArgs.callBack?.invoke(false)
                     return
@@ -355,12 +368,13 @@ class SyncService : Service(), ISyncService, IObserver
                             if (it == listenerEventArgs.ip)
                             {
                                 withContext(Dispatchers.Main) {
-                                    isSyncFlow.value = true
+                                    isSyncFlow.value = SyncState.SYNCED
                                     observeSyncState()
                                 }
                             }
-
                         }
+
+                        notificationService.start()
                     }
                 }
             }
@@ -381,7 +395,7 @@ class SyncService : Service(), ISyncService, IObserver
                         {
                             withContext(Dispatchers.Main) {
                                 dataStore.deleteTargetIp()
-                                isSyncFlow.value = false
+                                isSyncFlow.value = SyncState.NOT_SYNCED
                             }
                         }
 

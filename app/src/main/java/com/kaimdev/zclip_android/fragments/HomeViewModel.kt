@@ -1,6 +1,5 @@
 package com.kaimdev.zclip_android.fragments
 
-import android.app.AlertDialog
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -9,6 +8,7 @@ import android.os.IBinder
 import androidx.lifecycle.ViewModel
 import com.kaimdev.zclip_android.event_args.SyncServiceEventArgs
 import com.kaimdev.zclip_android.helpers.ServiceExtensions.Companion.subscribe
+import com.kaimdev.zclip_android.helpers.SyncState
 import com.kaimdev.zclip_android.interfaces.IEventArgs
 import com.kaimdev.zclip_android.interfaces.IObserver
 import com.kaimdev.zclip_android.interfaces.IService
@@ -29,7 +29,7 @@ class HomeViewModel @Inject constructor(
 ) :
     ViewModel(), IObserver
 {
-    private val isSyncFlow: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    private val isSyncFlow: MutableStateFlow<SyncState> = MutableStateFlow(SyncState.NOT_SYNCED)
 
     val showDialogFlow: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
@@ -74,10 +74,10 @@ class HomeViewModel @Inject constructor(
 
         syncService = null
 
-        isSyncFlow.value = false
+        isSyncFlow.value = SyncState.NOT_SYNCED
     }
 
-    fun isSync(): Flow<Boolean>
+    fun isSync(): Flow<SyncState>
     {
         return isSyncFlow
     }
