@@ -16,12 +16,12 @@ class RequestConnectionReceiver : BroadcastReceiver()
         if (isAccept!!)
         {
             syncService.apply {
-                action = SyncService.ACTION_ACCEPT_REQUEST_CONNECTION
+                action = SyncService.ACTION_ACCEPT_REQUEST_CONNECTION.toString()
             }
         } else
         {
             syncService.apply {
-                action = SyncService.ACTION_DENY_REQUEST_CONNECTION
+                action = SyncService.ACTION_DENY_REQUEST_CONNECTION.toString()
             }
         }
 
