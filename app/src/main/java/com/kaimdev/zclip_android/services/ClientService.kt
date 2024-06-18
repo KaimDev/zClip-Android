@@ -1,5 +1,7 @@
 package com.kaimdev.zclip_android.services
 
+import android.content.Context
+import android.widget.Toast
 import com.kaimdev.zclip_android.interfaces.IClientService
 import com.kaimdev.zclip_android.models.LocalIpModel
 import com.kaimdev.zclip_android.server.ClipboardContentDto
@@ -8,11 +10,11 @@ import com.kaimdev.zclip_android.server.IpCodeParams
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-class ClientService @Inject constructor(
+class ClientService(
     private val client: IApplicationApi,
-    private val localIpModel: LocalIpModel
+    private val localIpModel: LocalIpModel,
+    private val context: Context
 ) :
     IClientService
 {
@@ -33,6 +35,14 @@ class ClientService @Inject constructor(
 
     override fun requestConnection()
     {
+        CoroutineScope(Dispatchers.Main).launch {
+            Toast.makeText(
+                context,
+                "Requesting connection",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+
         CoroutineScope(Dispatchers.IO).launch {
             client.requestConnection(params)
         }

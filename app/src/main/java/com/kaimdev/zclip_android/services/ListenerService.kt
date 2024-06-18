@@ -1,5 +1,7 @@
 package com.kaimdev.zclip_android.services
 
+import android.content.Context
+import android.widget.Toast
 import com.kaimdev.zclip_android.event_args.ListenerEventArgs
 import com.kaimdev.zclip_android.event_args.ListenerEventType
 import com.kaimdev.zclip_android.helpers.ServiceExtensions.Companion.sendNotification
@@ -9,13 +11,27 @@ import fi.iki.elonen.NanoHTTPD
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-class ListenerService @Inject constructor(listenerSettingsModel: ListenerSettingsModel) :
-    NanoHTTPD(listenerSettingsModel.port), IListenerService
+class ListenerService(
+    listenerSettingsModel: ListenerSettingsModel,
+    private val context: Context
+) :
+    NanoHTTPD(
+        listenerSettingsModel.port,
+    ), IListenerService
 {
+
+
     override fun start()
     {
+        CoroutineScope(Dispatchers.Main).launch {
+            Toast.makeText(
+                context,
+                "Server started at 1705",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+
         CoroutineScope(Dispatchers.IO).launch {
             super.start()
         }

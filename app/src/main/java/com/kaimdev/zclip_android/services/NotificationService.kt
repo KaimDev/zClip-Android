@@ -4,27 +4,34 @@ import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import android.widget.Toast
 import androidx.core.app.NotificationManagerCompat
 import com.kaimdev.zclip_android.helpers.ClipboardModes
 import com.kaimdev.zclip_android.interfaces.INotificationService
 import com.kaimdev.zclip_android.stores.DataStore
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
 import com.kaimdev.zclip_android.helpers.NotificationBuilder
 import com.kaimdev.zclip_android.helpers.NotificationChannels
 
-class NotificationService @Inject constructor(
-    @ApplicationContext private val context: Context,
+class NotificationService(
+    private val context: Context,
     private val dataStore: DataStore,
     private val notificationBuilder: NotificationBuilder
 ) : INotificationService
 {
     override fun start()
     {
+        CoroutineScope(Dispatchers.Main).launch {
+            Toast.makeText(
+                context,
+                "Notification service started",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+
         createChannels()
         observeClipboardModes()
     }
@@ -38,13 +45,13 @@ class NotificationService @Inject constructor(
     {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O)
         {
-            val sendClipboardContentChannel = NotificationChannel (
+            val sendClipboardContentChannel = NotificationChannel(
                 NotificationChannels.SEND_CLIPBOARD_CONTENT,
                 NotificationChannels.SEND_CLIPBOARD_CONTENT,
                 NotificationManager.IMPORTANCE_LOW
             )
 
-            val requestConnectionChannel = NotificationChannel (
+            val requestConnectionChannel = NotificationChannel(
                 NotificationChannels.REQUEST_CONNECTION,
                 NotificationChannels.REQUEST_CONNECTION,
                 NotificationManager.IMPORTANCE_HIGH
