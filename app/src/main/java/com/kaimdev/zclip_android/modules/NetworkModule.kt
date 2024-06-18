@@ -21,15 +21,11 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.runBlocking
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import javax.inject.Inject
 
 @Module
 @InstallIn(SingletonComponent::class)
 class NetworkModule
 {
-    @Inject
-    private lateinit var dataStore: DataStore
-
     @SuppressLint("DefaultLocale")
     @Provides
     fun provideLocalIpAddress(@ApplicationContext context: Context): LocalIpModel
@@ -77,7 +73,7 @@ class NetworkModule
     }
 
     @Provides
-    fun provideRetrofit(): IApplicationApi
+    fun provideRetrofit(dataStore: DataStore): IApplicationApi
     {
         return runBlocking {
             val targetIp = async(Dispatchers.IO) {
