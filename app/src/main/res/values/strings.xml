@@ -14,6 +14,7 @@
     <string name="mode">mode</string>
     <string name="hint_target_ip">target ip</string>
     <string name="send">send</string>
+    <string name="invalid_ip">Invalid Ip</string>
 
     <!-- Notifications -->
     <string name="deny">deny</string>

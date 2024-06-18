@@ -51,32 +51,35 @@
         android:textSize="16sp"
         app:layout_constraintTop_toBottomOf="@id/iv_app_state" />
 
-    <!-- input -->
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/til_input"
-        android:layout_width="250dp"
-        android:layout_height="60dp"
-        android:layout_marginTop="50dp"
-        app:boxCornerRadiusBottomEnd="50dp"
-        app:boxCornerRadiusBottomStart="50dp"
-        app:boxCornerRadiusTopEnd="50dp"
-        app:boxCornerRadiusTopStart="50dp"
-        app:boxStrokeColor="@color/input_color_state"
-        app:boxStrokeWidth="3dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tv_app_state">
+        <!-- input -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/til_input"
+            android:layout_width="250dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center|center_vertical"
+            android:layout_marginTop="50dp"
+            app:boxCornerRadiusBottomEnd="50dp"
+            app:boxCornerRadiusBottomStart="50dp"
+            app:boxCornerRadiusTopEnd="50dp"
+            app:boxCornerRadiusTopStart="50dp"
+            app:boxStrokeColor="@color/input_color_state"
+            app:boxStrokeWidth="3dp"
+            app:errorEnabled="true"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tv_app_state">
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/tiet_target_ip"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:fontFamily="@font/jetbrains_mono_regular"
-            android:gravity="center"
-            android:hint="@string/hint_target_ip"
-            android:textAlignment="center" />
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/tiet_target_ip"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/jetbrains_mono_regular"
+                android:gravity="center"
+                android:inputType="textUri"
+                android:hint="@string/hint_target_ip"
+                android:textAlignment="center" />
 
-    </com.google.android.material.textfield.TextInputLayout>
+        </com.google.android.material.textfield.TextInputLayout>
 
     <Button
         android:id="@+id/btn_synchronize"

@@ -116,8 +116,30 @@ class HomeFragment(private val fragmentEventModel: FragmentEventModel) : Fragmen
         if (!isSynced)
         {
             binding.btnSynchronize.setOnClickListener {
+
                 if (verifyNetwork())
+                {
+                    val ip = binding.tietTargetIp.text.toString()
+
+                    // Regex for 192.168.X.X
+                    val regex = Regex("^(192\\.168\\.[0-9]{1,3}\\.[0-9]{1,3})\$")
+
+                    if (!regex.matches(ip))
+                    {
+                        binding.tilInput.isErrorEnabled = true
+                        binding.tilInput.error = getString(R.string.invalid_ip)
+                        binding.tilInput.requestFocus()
+                        return@setOnClickListener
+                    } else
+                    {
+                        binding.tilInput.isErrorEnabled = false
+                    }
+
+                    dataStore.setTargetIp(ip)
+
                     viewModel.startSyncService()
+                }
+
             }
         } else
         {
@@ -265,7 +287,7 @@ class HomeFragment(private val fragmentEventModel: FragmentEventModel) : Fragmen
             viewModel.acceptConnection()
             viewModel.showDialogFlow.value = false
         }
-        builder.setNegativeButton(getString(R.string.deny)) { dialog, which ->
+        builder.setNegativeButton(getString(R.string.deny)) { _, _ ->
             viewModel.denyConnection()
             viewModel.showDialogFlow.value = false
         }

@@ -42,7 +42,6 @@ class HomeViewModel @Inject constructor(
             val binder = service as SyncService.LocalBinder
             syncService = binder.getService()
             syncService!!.start()
-
             syncService!!.subscribe(this@HomeViewModel)
 
             CoroutineScope(Dispatchers.IO).launch {
@@ -105,7 +104,8 @@ class HomeViewModel @Inject constructor(
             {
                 is ISyncService ->
                 {
-                    showDialogFlow.value = (eventArgs as SyncServiceEventArgs).showRequestConnectionDialog
+                    showDialogFlow.value =
+                        (eventArgs as SyncServiceEventArgs).showRequestConnectionDialog
                 }
             }
         }
